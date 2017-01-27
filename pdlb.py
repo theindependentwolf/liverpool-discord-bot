@@ -1,6 +1,3 @@
-#AUTHOR: ANIRUTH OBLAH
-
-
 import discord
 from discord.ext import commands
 import random
@@ -12,10 +9,9 @@ import functions
 
 
 
-
 description = ''' Birdie-G, a red avian bot. '''
 
-bot = commands.Bot(command_prefix='!', description=description)
+bot = commands.Bot(command_prefix='!', description = description)
 
 @bot.event
 async def on_ready():
@@ -25,10 +21,16 @@ async def on_ready():
     print('------')
 
 
+@bot.event
+async def on_message(message):
+    # we do not want the bot to reply to itself
+	response = functions.processMessage(message, bot)
+	if response:
+		await bot.send_message(message.channel, response)
+	await bot.process_commands(message)
 
-#Tells if the person parsed in the argument is cool
 
-@bot.command(passed_context=True)
+@bot.command(pass_context=True)
 async def cool(name):
 	"""Determines if someone is cool. Example: !cool Alberto_Moreno"""
 	nolist = ['united','everton','manchester','scum','fellaini','mu','utd']
@@ -41,9 +43,6 @@ async def cool(name):
 		else:
 			await bot.say('Yes, {} is cool'.format(name))
 
-
-#Predicts games between two teams
-
 @bot.command()
 async def predict(team1: str, team2: str):
 	"""Predicts result. Example: !predict Liverpool Spurs"""
@@ -54,9 +53,6 @@ async def predict(team1: str, team2: str):
 		await bot.say("Missing arguments. Please mention two teams.")
 
 
-
-#Predicts the next Liverpool game
-
 @bot.command()
 async def predict_next():
 	"""Predicts the next Liverpool FC game"""
@@ -66,7 +62,7 @@ async def predict_next():
 
 
 
-#GIFS - Lucas Unackee gif
+#GIFS
 
 @bot.command()
 async def lucas():
@@ -74,7 +70,7 @@ async def lucas():
 	await bot.say(functions.gifs("lucas"))
 
 
-#Returns cat gifs
+
 
 @bot.command()
 async def cat(*number):
@@ -92,7 +88,7 @@ async def cat(*number):
 
 
 
-#Returns a random Klopp gif if number isn't specified. Number of gifs may vary as more are added
+
 
 @bot.command()
 async def klopp(*number):
@@ -109,22 +105,89 @@ async def klopp(*number):
 	await bot.say(giflink)
 
 
-
-
-#Returns a Hendo gif
-
 @bot.command()
 async def hendo():
 	""" Hendo stare """
 	await bot.say(functions.gifs("hendo"))
 
 
-#returns a lallana gif
-
 @bot.command()
 async def lallana():
 	""" Lallana """
 	await bot.say(functions.gifs("lallana"))
+
+
+@bot.command()
+async def nam():
+	""" Flashback """
+	await bot.say(functions.gifs("nam"))
+
+
+@bot.command()
+async def disappoint():
+	""" Stevie and Carra disappointed """
+	await bot.say(functions.gifs("disappoint"))
+
+
+@bot.command()
+async def gerrard():
+	""" Steven Gerrard """
+	await bot.say(functions.gifs("gerrard"))
+
+
+@bot.command()
+async def bobby():
+	""" Bobby skills """
+	await bot.say(functions.gifs("bobby"))
+
+
+
+@bot.command()
+async def dance():
+	""" Sturridge animation dance """
+	await bot.say(functions.gifs("dance"))
+
+
+@bot.command()
+async def ffs():
+	""" FFS Brendan """
+	await bot.say(functions.gifs("ffs"))
+
+
+
+@bot.command()
+async def everton():
+	""" Everton """
+	await bot.say(functions.gifs("everton"))
+
+
+@bot.command()
+async def woydance():
+	""" Woy Dance """
+	await bot.say(functions.gifs("woydance"))
+
+
+@bot.command()
+async def suarez():
+	""" Suarez """
+	await bot.say(functions.gifs("suarez"))
+
+
+@bot.command()
+async def wengerout():
+	""" Link to Arsenal Fan TV """
+	await bot.say('https://www.youtube.com/user/arsenalfanstv')
+
+
+
+@bot.command()
+async def goals(*name):
+	"""Goal Gifs. Example !goals gerrard """
+	if (name):
+		await bot.say(functions.goals(name))
+	else:
+		await bot.say(functions.goals('gerrard'))
+
 
 
 
@@ -138,7 +201,7 @@ async def countries():
 
 
 
-#Standings of different leagues
+#Table
 
 
 @bot.command()
@@ -152,15 +215,11 @@ async def table(*country):
 	#print(printablestring)
 
 
-# Get a list of commands for different team names
-
 @bot.command()
 async def injuries_teams():
 	"""List of team names for injuries list """
 	await bot.say(functions.injuries_teams())
 
-
-#command to get injury list for different teams. Default is Liverpool FC
 
 @bot.command()
 async def injuries(*team):
@@ -172,8 +231,4 @@ async def injuries(*team):
 
 
 
-#Get bot token from the discord developer page
-
-bot.run(bot_token)
-
-
+bot.run('token')

@@ -1,3 +1,4 @@
+import discord
 from random import randint
 import random
 import random
@@ -8,11 +9,43 @@ from bs4 import BeautifulSoup
 
 
 
+#Predicts the result between two teams. Works on Random Numbers. Favors Liverpool slightly
+
 def predict(team1: str, team2: str):
-	team1_score = randint(0,3)
-	team2_score = randint(0,3)
+	liverpool = ['lfc', 'liverpool', 'liverpoolfc']
+	utd = ['scum','utd','mancs','manchester','united']
+
+	chance = randint(0,10)
+	if(chance > 7):
+		team1_score = randint(0,5)
+		team2_score = randint(0,5)
+	else:
+		team1_score = randint(0,3)
+		team2_score = randint(0,3)
+
+
+	if(team1 in liverpool):
+		team1_score += 1
+	elif(team1 in utd):
+		if (team1_score > 0):
+			team1_score -= 1
+	
+
+	
+	if(team2 in liverpool):
+		team2_score += 1
+	elif(team2 in utd):
+		if (team2_score > 0):
+			team2_score -= 1
+
+	
+	
 	
 	return ( team1 + str(team1_score).rjust(2) + " - " + str(team2_score).ljust(2) + team2 )
+
+
+
+#Predicts Liverpool's next result
 
 
 def predict_next():
@@ -26,17 +59,51 @@ def predict_next():
 	return (result)
 
 
+
+#Contains gif links
+
+
 def gifs(case: str):
 	switcher = {
 		'lucas': "https://m.popkey.co/1e495f/LlpVq.gif",
 		'lallana': "https://gfycat.com/ThirstyTotalFlounder",
 		'hendo': "https://giant.gfycat.com/PopularAcceptableHawaiianmonkseal.gif",
 		'wij':"http://cdn.images.express.co.uk/img/dynamic/galleries/x701/152689.jpg",
-	}	
-	return switcher.get(case, "not found")
+		'disappoint':'https://31.media.tumblr.com/25277ed25bab911a828c24ea938f74c7/tumblr_inline_myxmcqEy3k1qc9aza.gif',
+		'nam':'https://i.imgur.com/VgVjotr.gif',
+		'ffs':'https://gfycat.com/JubilantNimbleJackrabbit',
+		'gerrard':'http://i.imgur.com/5oGaBFu.gif',
+		'bobby':'http://imgur.com/VshfmIO',
+		'dance':'http://giphy.com/gifs/lfc-i1MGZo7GHZFte',
+		'everton':'https://cdn.meme.am/instances/49057267.jpg',
+		'suarez':'https://greatrednorth.files.wordpress.com/2013/04/luis-ivanovic.gif?w=510',
+		'woydance':'http://media0.giphy.com/media/3oEjHE8cahZQc9ZXa0/giphy.gif'
+		
+	}
+	return switcher.get(case, "not found")	
 
 
+#Contains links to goals
 
+
+def goals(name):
+	notfound = "http://giphy.com/gifs/internet-google-chrone-9J7tdYltWyXIY"
+	goaldict = {
+		'gerrard':'https://www.youtube.com/watch?v=4sBxm8Qo4sY',
+		'riise':'https://youtu.be/tx8tMiaNawI?t=30s',
+		'kolo':'https://www.youtube.com/watch?v=B7quD8H_75E',
+		'lovren':'https://www.youtube.com/watch?v=LJV5xkj_3SA',
+		'suarez':'https://www.youtube.com/watch?v=iX8eZn9uFU4',
+		'xabi':'https://www.youtube.com/watch?v=DuZd0n8MqWs',
+		'lallana':'https://www.youtube.com/watch?v=7oBfGmrmQ8c',
+		'istanbul':'https://www.youtube.com/watch?v=tnB4XAhl6PY'
+	}
+
+	return goaldict.get(name[0],notfound)
+	
+
+
+# Returns cat gifs
 
 
 def cat(number):
@@ -49,7 +116,7 @@ def cat(number):
 		return(random.choice(cat_list))
 
 
-
+# Returns Klopp gifs
 		
 
 def klopp(number):
@@ -64,12 +131,15 @@ def klopp(number):
 
 
 
+# Contains a list of countries for table commands
+
 def countries():
 	countries_list = "```To get the standings for different leagues, !table country_name\nExample: !table scotland\n\nList of countries: \n\nengland\nfrance\ngermany\nitaly\nchamp (for championship)\nnl (for Dutch League)\nrussia\naus (for Australian League)\nturkey\nscotland\nireland\nusa for USA EAST\nusawest for USA WEST```"
 	return countries_list
 
 
 
+# Returns table for specific country. Default is Liverpool. Parsed from BBC Wesbite.
 
 def table(*country):
 	url_dict = {'england':'http://www.bbc.com/sport/football/premier-league/table',
@@ -144,6 +214,9 @@ def table(*country):
 
 
 
+# List of teams for for which injuries are avilable
+
+
 def injuries_teams():
 	team_list = ["hull","sunderland","saints","palace","watford","stoke","arsenal","everton","liverpool","whu - For West Ham","swansea","wba - For West Brom","city - For Man City","burnley","spurs","boro - For Middlesborough","united - For Scum","leicester","chelsea","bournemouth"]
 	printable_string = "\n".join(team_list)
@@ -152,6 +225,8 @@ def injuries_teams():
 	
 
 
+
+# Returns injuries. Default is Liverpool.
 
 def injuries(team):
 	teams={'hull':'Hull City away shirt',
@@ -203,3 +278,34 @@ def injuries(team):
 	printable_string = "\n".join(player_list)
 	printable_string = "```" + printable_string + "```"
 	return(printable_string)
+
+
+
+# Reads every message in the chat and processes them
+
+def processMessage(message, bot):
+	swear_words = ['cunt','fuck','fucking','poo', 'shit', 'poop', 'piss', 'ass', 'faggot','nigger','asshole','kunt']
+	
+	channel = bot.get_channel('269658482238554113')
+
+	if message.author == bot.user:
+		return 
+		
+	# Says hi to Liverbird
+
+	if message.author.id == '195628542233411593' and "hey" in message.content:
+		return "Hi " + message.author.nick
+
+	# Directs user to politics channel when trump is mentioned
+	
+	if "trump" in message.content.lower() and message.channel != channel:
+		return "Please head over to {0.mention}. MAGA.".format(channel)
+
+
+	# Discplines user when strong language is used. Frequency is hard-coded.
+
+	if any(word in message.content.lower() for word in swear_words):
+		if randint(0,25) == 7:
+			return "Please watch your language sir, {0.author.mention}".format(message)
+		else:
+			return

@@ -284,7 +284,7 @@ def injuries(team):
 # Reads every message in the chat and processes them
 
 def processMessage(message, bot):
-	swear_words = ['cunt','fuck','fucking','poo', 'shit', 'poop', 'piss', 'ass', 'faggot','nigger','asshole','kunt']
+	swear_words = ['cunt','fuck','fucking','poo', 'shit', 'poop', 'piss', 'ass', 'faggot','nigger','asshole','kunt', 'bitch']
 	
 	channel = bot.get_channel('269658482238554113')
 
@@ -298,14 +298,14 @@ def processMessage(message, bot):
 
 	# Directs user to politics channel when trump is mentioned
 	
-	if "trump" in message.content.lower() and message.channel != channel:
+	if "trump" in message.content.lower().split() and message.channel != channel:
 		return "Please head over to {0.mention}. MAGA.".format(channel)
 
 
 	# Discplines user when strong language is used. Frequency is hard-coded.
 
-	if any(word in message.content.lower() for word in swear_words):
-		if randint(0,25) == 7:
+	if any(word in message.content.lower().split() for word in swear_words):
+		if randint(0,100) == 7:
 			return "Please watch your language sir, {0.author.mention}".format(message)
 		else:
 			return

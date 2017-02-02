@@ -6,7 +6,7 @@ import urllib.request
 from html.parser import HTMLParser
 from bs4 import BeautifulSoup
 import functions
-
+import config
 
 
 description = ''' Birdie-G, a red avian bot. '''
@@ -231,4 +231,6 @@ async def injuries(*team):
 
 
 
-bot.run('token')
+bot.run(config.token)
+
+

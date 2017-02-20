@@ -7,7 +7,12 @@ from html.parser import HTMLParser
 from bs4 import BeautifulSoup
 import functions
 import config
-
+import datetime
+import dateutil.relativedelta as relativetd
+import nocontext as reddit
+import asyncio
+import praw
+import subfeed
 
 description = ''' Birdie-G, a red avian bot. '''
 
@@ -23,166 +28,143 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    # we do not want the bot to reply to itself
-	response = functions.processMessage(message, bot)
-	if response:
-		await bot.send_message(message.channel, response)
-	await bot.process_commands(message)
+    """
+    Processes incoming message to do various fun stuff
+    """
+    response = functions.processMessage(message, bot)
+    if response:
+        await bot.send_message(message.channel, response)
+    await bot.process_commands(message)
 
 
-@bot.command(pass_context=True)
-async def cool(name):
-	"""Determines if someone is cool. Example: !cool Alberto_Moreno"""
-	nolist = ['united','everton','manchester','scum','fellaini','mu','utd']
-	if(name in nolist):
-		await bot.say('No, {} is not cool'.format(name))
-	else:
-		random_number = randint(1,10)
-		if random_number <= 2:
-			await bot.say('No, {} is not cool'.format(name))
-		else:
-			await bot.say('Yes, {} is cool'.format(name))
+
+async def no_context_general():
+    """
+    Send a message from /r/nocontext
+    """
+    await bot.wait_until_ready()
+    talk_interval = 20000
+    nocontext_channel = discord.Object(id=config.nocontext_channel_id)
+    while not bot.is_closed:
+        nocontext_message = reddit.say_something()
+        await bot.send_message(nocontext_channel, nocontext_message)
+        await asyncio.sleep(talk_interval)
+
+
+async def subredditfeed():
+    """
+    Post new posts from subreddit to the chat. Updates happens every few minutes. 
+    """
+    await bot.wait_until_ready()
+    subfeed_channel = discord.Object(id=config.subfeed_channel_id)
+    while not bot.is_closed:
+        new_posts = subfeed.get_latest_post()
+        if new_posts:
+            for post in new_posts[::-1]:
+                await bot.send_message(subfeed_channel, post)
+        else:
+            pass
+            
+        await asyncio.sleep(config.subfeed_update_interval)
+
+
+
+async def twitterfeed():
+    """
+    Post new posts from LFC Twitter to the chat. Updates happens every few minutes. 
+    """
+    await bot.wait_until_ready()
+    twitter_channel = discord.Object(id=config.twitter_channel_id)
+    while not bot.is_closed:
+        new_posts = subfeed.get_latest_tweets()
+        if new_posts:
+            for post in new_posts[::-1]:
+                await bot.send_message(twitter_channel, post)
+        else:
+            pass
+
+        await asyncio.sleep(config.twitter_update_interval)
+
+
 
 @bot.command()
 async def predict(team1: str, team2: str):
-	"""Predicts result. Example: !predict Liverpool Spurs"""
-	if (team1 and team2):
-		result = functions.predict(team1, team2)
-		await bot.say(result)
-	else:
-		await bot.say("Missing arguments. Please mention two teams.")
+    """
+    !predict Liverpool Spurs
+    """
+    if team1 and team2:
+        result = functions.predict(team1, team2)
+    else:
+        result = "Missing arguments. Please mention two teams."
+    embed = discord.Embed(description=result, colour=discord.Colour(0xcc0000))
+    await bot.say(embed=embed)
 
 
 @bot.command()
-async def predict_next():
-	"""Predicts the next Liverpool FC game"""
-	result = functions.predict_next()
-	await bot.say(result)
-
-
-
-
-#GIFS
-
-@bot.command()
-async def lucas():
-	"""Unlackee"""
-	await bot.say(functions.gifs("lucas"))
-
+async def gifs(gifs_input):
+    """
+    !gifs firmino
+    """
+    if gifs_input==False:
+        await bot.say("Missing argument. Example: !gifs firmino")
+    else:
+        await bot.say(functions.get_gifs(gifs_input))
 
 
 
 @bot.command()
 async def cat(*number):
-        """ Cat gifs. Enter optional number for specific gif """
-        if (number):
-                        inputval = number[0][0]
-                        if(str(inputval).isdigit()):
-                                choice = inputval
-                        else:
-                                choice = 'x'
+    """ 
+    !cat or !cat <number> 
+    """
+    if number:
+        inputval = number[0][0]
+        if(str(inputval).isdigit()):
+            choice = inputval
         else:
-                choice = 'x'
-        giflink = functions.cat(choice)
-        await bot.say(giflink)
-
-
+            choice = 'x'
+    else:
+        choice = 'x'
+    giflink = functions.cat(choice)
+    await bot.say(giflink)
 
 
 
 @bot.command()
 async def klopp(*number):
-	""" Klopp gifs. Enter optional number for specific gif """
-	if (number):
-			inputval = number[0][0]
-			if(str(inputval).isdigit()):
-				choice = inputval
-			else:
-				choice = 'x'
-	else:
-		choice = 'x'
-	giflink = functions.klopp(choice)
-	await bot.say(giflink)
+    """ 
+    !klopp or !klopp <number>
+    """
+    if number:
+        inputval = number[0][0]
+        if(str(inputval).isdigit()):
+            choice = inputval
+        else:
+            choice = 'x'
+    else:
+        choice = 'x'
 
+    giflink = functions.klopp(choice)
+    await bot.say(giflink)
 
-@bot.command()
-async def hendo():
-	""" Hendo stare """
-	await bot.say(functions.gifs("hendo"))
-
-
-@bot.command()
-async def lallana():
-	""" Lallana """
-	await bot.say(functions.gifs("lallana"))
-
-
-@bot.command()
-async def nam():
-	""" Flashback """
-	await bot.say(functions.gifs("nam"))
-
-
-@bot.command()
-async def disappoint():
-	""" Stevie and Carra disappointed """
-	await bot.say(functions.gifs("disappoint"))
-
-
-@bot.command()
-async def gerrard():
-	""" Steven Gerrard """
-	await bot.say(functions.gifs("gerrard"))
-
-
-@bot.command()
-async def bobby():
-	""" Bobby skills """
-	await bot.say(functions.gifs("bobby"))
-
-
-
-@bot.command()
-async def dance():
-	""" Sturridge animation dance """
-	await bot.say(functions.gifs("dance"))
-
-
-@bot.command()
-async def ffs():
-	""" FFS Brendan """
-	await bot.say(functions.gifs("ffs"))
-
-
-
-@bot.command()
-async def everton():
-	""" Everton """
-	await bot.say(functions.gifs("everton"))
-
-
-@bot.command()
-async def woydance():
-	""" Woy Dance """
-	await bot.say(functions.gifs("woydance"))
-
-
-@bot.command()
-async def suarez():
-	""" Suarez """
-	await bot.say(functions.gifs("suarez"))
 
 
 @bot.command()
 async def wengerout():
-	""" Link to Arsenal Fan TV """
-	await bot.say('https://www.youtube.com/user/arsenalfanstv')
+    """ 
+    Arsenal Fan TV
+    """
+    arsenal_fan_tv = "https://www.youtube.com/user/arsenalfanstv"
+    embed = discord.Embed(title="Arsenal Fan TV", url = arsenal_fan_tv, colour=discord.Colour(0xcc0000))
+    await bot.say(embed=embed)
 
 
 
 @bot.command()
 async def goals(*name):
-	"""Goal Gifs. Example !goals gerrard """
+	"""
+    !goals gerrard
+    """
 	if (name):
 		await bot.say(functions.goals(name))
 	else:
@@ -190,47 +172,62 @@ async def goals(*name):
 
 
 
-
-#Table Help - List of countries to be displayed
-
 @bot.command()
-async def countries():
-	""" To get a list of countries available for table command """
-	printable_string = functions.countries()
-	await bot.say(printable_string)
+async def list_help():
+    """
+    list of inputs for !table, !injuries, !gifs
+    """
+    embed = discord.Embed(description=functions.list_help(), colour=discord.Colour(0xcc0000))
+    await bot.say(embed = embed)
 
-
-
-#Table
 
 
 @bot.command()
 async def table(*country):
-	"""Shows the Premier League Table. !table country_name for others"""
-	if(country):
-		standings = functions.table(country) 
-	else:
-		standings = functions.table()
-	await bot.say(standings)
-	#print(printablestring)
+    """
+    !table or !table spain
+    """
+    if country:
+        standings = functions.table(country)
+    else:
+        standings = functions.table()
+    embed = discord.Embed(description = standings, colour = discord.Colour(0xcc0000))
+    await bot.say(embed=embed)
 
-
-@bot.command()
-async def injuries_teams():
-	"""List of team names for injuries list """
-	await bot.say(functions.injuries_teams())
 
 
 @bot.command()
 async def injuries(*team):
-	"""Shows a list of injuries. Example: !injuries team_name"""
-	if(team):
-		await bot.say(functions.injuries(team))
-	else:
-		await bot.say(functions.injuries('liverpool'))
+    """
+    !injuries or !injuries boro
+    """
+    if team:
+        injury_list = functions.injuries(team)
+    else:
+        injury_list = functions.injuries(["liverpool"])
 
+    embed = discord.Embed(description = injury_list, color = discord.Colour(0xcc0000))
+    await bot.say(embed=embed)
 
+'''
 
+@bot.command()
+async def next():
+    """
+    Next Game Countdown. Ask Liverbird.
+    """
+    spurs = datetime.datetime(2017, 2, 11, 17, 30)
+    now = datetime.datetime.now()
+    countdown = relativetd.relativedelta(spurs, now)
+    if ( countdown.seconds > 0):
+        countdown_display_string = "```{} days {} hours {} minutes {} seconds\n\nLiverpool Vs Spurs at Anfield```".format(countdown.days, countdown.hours, countdown.minutes, countdown.seconds)
+        await bot.say(countdown_display_string)
+    else:
+        await bot.say("No matches entered in the program. Please ask Liverbird.")
+'''
+
+bot.loop.create_task(no_context_general())
+bot.loop.create_task(subredditfeed())
+bot.loop.create_task(twitterfeed())
 bot.run(config.token)
-
 

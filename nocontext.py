@@ -61,14 +61,17 @@ def shower_birdie():
     return(str(post.title))    
 
 
-def give_advice():
+def give_advice(advice_category):
     """
     Returns advice from shittylifeprotips
     """
     reddit = praw.Reddit(user_agent=config.my_user_agent,
                          client_id=config.my_client_id,
                          client_secret=config.my_client_secret)
-    subreddit = reddit.subreddit("ShittyLifeProTips")
+    if advice_category == "need advice":
+        subreddit = reddit.subreddit("ShittyLifeProTips")
+    else:
+        subreddit = reddit.subreddit("LifeProTips")
     
     while(True):
         submission = subreddit.random()

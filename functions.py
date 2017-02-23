@@ -7,8 +7,9 @@ import urllib.request
 from html.parser import HTMLParser
 from bs4 import BeautifulSoup
 import nocontext
-
-
+import requests
+import datetime
+import config
 
 def predict(team1: str, team2: str):
     """
@@ -250,6 +251,38 @@ def injuries(team):
 
 
 
+def get_weather(location, unit):
+    """
+    Get weather information about a location
+    """
+    location = location.replace(" ","")
+    url = "http://api.openweathermap.org/data/2.5/weather?q={}&appid={}".format(location, config.openweather_api_key)
+    weather = requests.get(url).json()
+    if weather['cod'] == "502":
+        response = "Error: Not found city"
+        return response
+    else:
+        if unit == "C":
+            temp_unit = "C"
+            temp = int(weather['main']['temp'] - 273.15)
+            temp_max = int(weather['main']['temp_max'] - 273.15)
+            temp_min = int(weather['main']['temp_min'] - 273.15)
+        elif unit == "F":
+            temp_unit = "F"
+            temp = int(weather['main']['temp'] * (9/5) - 459.67)
+            temp_max = int(weather['main']['temp_max'] * (9/5) - 459.67)
+            temp_min = int(weather['main']['temp_min'] * (9/5) - 459.67)
+        
+        description = weather['weather'][0]['description']
+        humidity = weather['main']['humidity']
+        wind_kmph = weather['wind']['speed'] * 3.6
+        location_name = weather['name']
+        location_country = weather['sys']['country']
+        response = "Location: **{}, {}**\nDescription: **{}**\nTemp: **{} {}**\nMax/Min Temp: **{}/{} {}**\nHumidity: **{} %**\nWind Speed: **{:0.1f} kmph**".format(location_name, location_country, description, temp, temp_unit, temp_max, temp_min, temp_unit, humidity, wind_kmph)       
+        
+        return response
+
+
 def processMessage(message, bot):
     """
     Processes Incoming Messages and sends responses accordingly
@@ -268,8 +301,9 @@ def processMessage(message, bot):
         return(nocontext_message)
 
     #Ask birdie for advice
-    if str(message.content).lower().strip() == "need advice":
-        nocontext_message = nocontext.give_advice()
+    if str(message.content).lower().strip() == "need advice" or str(message.content).lower().strip() == "really need advice":
+        advice_category = str(message.content).lower().strip()
+        nocontext_message = nocontext.give_advice(advice_category)
         return(nocontext_message)
 		
 	# Says hi to Liverbird
@@ -291,4 +325,6 @@ def processMessage(message, bot):
             return "Please watch your language sir, {0.author.mention}".format(message)
         else:
             return
-   
+
+
+

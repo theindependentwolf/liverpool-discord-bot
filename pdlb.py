@@ -13,6 +13,7 @@ import nocontext as reddit
 import asyncio
 import praw
 import subfeed
+import re
 
 description = ''' Birdie-G, a red avian bot. '''
 
@@ -43,12 +44,12 @@ async def no_context_general():
     Send a message from /r/nocontext
     """
     await bot.wait_until_ready()
-    talk_interval = 20000
+    talk_interval = 25000
     nocontext_channel = discord.Object(id=config.nocontext_channel_id)
     while not bot.is_closed:
         nocontext_message = reddit.say_something()
-        await bot.send_message(nocontext_channel, nocontext_message)
         await asyncio.sleep(talk_interval)
+        await bot.send_message(nocontext_channel, nocontext_message)
 
 
 async def subredditfeed():
@@ -209,7 +210,31 @@ async def injuries(*team):
     embed = discord.Embed(description = injury_list, color = discord.Colour(0xcc0000))
     await bot.say(embed=embed)
 
-'''
+
+@bot.command()
+async def weather(*args):
+    """
+    !weather London, UK or !weather Portland unit="F"
+    """
+    args = list(args)
+    if len(args) == 0:
+        response = "Please enter a location.\nExamples: !weather London, UK\n!weather Portland F"
+    else:
+        args = [x.lower() for x in args]
+        if "f" in args:
+            unit = "F"
+            args.remove("f")
+        else:
+            if "c" in args:
+                args.remove("c")
+            unit = "C" 
+        arguments = ' '.join(args)
+        location = arguments.strip().replace(" ","")
+        response = functions.get_weather(location, unit)
+     
+    embed = discord.Embed(description = response, color = discord.Colour(0xcc0000))
+    embed.set_footer(text="                                                       ")
+    await bot.say(embed=embed)
 
 @bot.command()
 async def next():
@@ -224,7 +249,7 @@ async def next():
         await bot.say(countdown_display_string)
     else:
         await bot.say("No matches entered in the program. Please ask Liverbird.")
-'''
+
 
 bot.loop.create_task(no_context_general())
 bot.loop.create_task(subredditfeed())

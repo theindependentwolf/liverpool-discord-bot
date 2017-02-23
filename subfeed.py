@@ -2,6 +2,8 @@ import redis
 import praw
 import config
 import time
+import twitter
+
 
 def get_latest_post():
     """
@@ -15,7 +17,7 @@ def get_latest_post():
     subfeed_key = "sorted_lfc"
     unique_new_list = []
     subreddit = reddit.subreddit(config.subfeed_subreddit)
-    for submission in subreddit.new(limit=config.subfeed_limit):
+    for submission in subreddit.hot(limit=config.subfeed_limit):
         current_time = int(time.time())
         present_in_db = red.zadd(subfeed_key, submission.id, current_time)
         if present_in_db == 1:
@@ -25,9 +27,6 @@ def get_latest_post():
 
 
 
-
-import twitter
-import time
 
 
 

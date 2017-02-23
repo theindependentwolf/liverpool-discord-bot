@@ -34,3 +34,11 @@ Instructions:
 3. Create a config.py file where you store all your credentials, params, and "token".
 
 4. Run pdlb.py file
+
+
+To be Added:
+--------------
+
+1. Logging  
+2. Live Scores
+3. Fixtures

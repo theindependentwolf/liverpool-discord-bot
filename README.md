@@ -20,6 +20,8 @@ Pre-requisities:
 
 5. An app on the discord developer website.
 
+6. Redis NoSQL DB
+
 
 
 Instructions:

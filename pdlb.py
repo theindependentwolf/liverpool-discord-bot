@@ -6,6 +6,7 @@ import urllib.request
 from html.parser import HTMLParser
 from bs4 import BeautifulSoup
 import functions
+import score
 import config
 import datetime
 import dateutil.relativedelta as relativetd
@@ -14,6 +15,7 @@ import asyncio
 import praw
 import subfeed
 import re
+
 
 description = ''' Birdie-G, a red avian bot. '''
 
@@ -44,7 +46,7 @@ async def no_context_general():
     Send a message from /r/nocontext
     """
     await bot.wait_until_ready()
-    talk_interval = 25000
+    talk_interval = 40000 
     nocontext_channel = discord.Object(id=config.nocontext_channel_id)
     while not bot.is_closed:
         nocontext_message = reddit.say_something()
@@ -87,6 +89,13 @@ async def twitterfeed():
         await asyncio.sleep(config.twitter_update_interval)
 
 
+@bot.command()
+async def thinking():
+    """
+    Emoji
+    """
+    emoji_sign = ":thinking:"
+    await bot.say(emoji_sign)
 
 @bot.command()
 async def predict(team1: str, team2: str):
@@ -235,6 +244,18 @@ async def weather(*args):
     embed = discord.Embed(description = response, color = discord.Colour(0xcc0000))
     embed.set_footer(text="                                                       ")
     await bot.say(embed=embed)
+
+
+@bot.command()
+async def scores(*league):
+    """
+    !scores or !scores epl
+    """
+    
+    scores_string = score.get_scores(*league)
+    embed = discord.Embed(description = scores_string, color = discord.Colour(0xcc0000))
+    await bot.say(embed=embed)    
+
 
 @bot.command()
 async def next():

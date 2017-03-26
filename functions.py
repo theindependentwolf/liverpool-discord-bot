@@ -10,6 +10,8 @@ import nocontext
 import requests
 import datetime
 import config
+import asyncio
+
 
 def predict(team1: str, team2: str):
     """
@@ -114,7 +116,7 @@ def list_help():
     Returns a list of available inputs tables, injuries, goals
     """
     goals = "gerrard, riise, kolo, suarez, xabi, lallana, istanbul"
-    table = "england, scotland, aus, germany, italy, france, turkey, usa, usawest, spain, russia, nl(for holland), ireland, russia"
+    table = "england, champ, league1, league2, scotland, aus, germany, italy, france, turkey, usa, usawest, spain, russia, nl(for holland), ireland, russia"
     injuries = "hull, sunderland, saints, palace, watford, stoke, arsenal, everton, liverpool, whu, swansea, wba, city, burnley, spurs, united, leicester, boro, chelsea, bournemouth"
     gifs = "lallana, wij, hendo, firmino, nam, disappoint, ffs, woydance, dance, gerrard, suarez, everton"    
     
@@ -137,7 +139,9 @@ def table(*country):
         'champ':'http://www.bbc.com/sport/football/championship/table',
         'nl':'http://www.bbc.com/sport/football/dutch-eredivisie/table',
         'aus':'http://www.bbc.com/sport/football/australian-a-league/table',
-        'ireland':'http://www.bbc.com/sport/football/league-of-ireland-premier/table'
+        'ireland':'http://www.bbc.com/sport/football/league-of-ireland-premier/table',
+        'league1':'http://www.bbc.com/sport/football/league-one/table',
+        'league2':'http://www.bbc.com/sport/football/league-two/table'
         }
     if(country):
         league = str(country[0][0]).strip().lower()
@@ -283,16 +287,24 @@ def get_weather(location, unit):
         return response
 
 
-def processMessage(message, bot):
+async def processMessage(message, bot):
     """
     Processes Incoming Messages and sends responses accordingly
     """
     swear_words = ['cunt','fuck','fucking','poo', 'shit', 'poop', 'piss', 'ass', 'faggot','nigger','asshole','kunt', 'bitch']
+    bot_shitty = ['shit','shitty','cunt']    
+    bot_shitty_response = ['Fuck off, you shitty human!', 'shit human!', 'fuck off!', 'cunt!', 'twat!', 'you little shit!', 'fgt'] 
     
+
     channel = bot.get_channel('269658482238554113')
     
     if message.author == bot.user:
         return
+
+    #Reply to 'shitty bot' messages
+    if "bot" in message.content.lower().split() and any(word in message.content.lower().split() for word in bot_shitty):
+        await asyncio.sleep(1)
+        return random.choice(bot_shitty_response)
 
 
     #Ask birdie for shower thoughts
@@ -305,6 +317,19 @@ def processMessage(message, bot):
         advice_category = str(message.content).lower().strip()
         nocontext_message = nocontext.give_advice(advice_category)
         return(nocontext_message)
+
+    #Don't curse at birdie
+    if "fuck you birdie" in message.content.lower():
+        await asyncio.sleep(2)
+        return "Fuck you, {0.author.mention}".format(message)
+
+    if "fuck off birdie" in message.content.lower():
+        await asyncio.sleep(2)
+        return "No! You fuck off cunt! {}".format(message.author.mention)
+
+    if "stupid bot" in message.content.lower():
+        await asyncio.sleep(2)
+        return "Stupid human!"
 		
 	# Says hi to Liverbird
 

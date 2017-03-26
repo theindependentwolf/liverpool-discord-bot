@@ -2,7 +2,8 @@ import praw
 import config
 import discord
 import asyncio
-
+import redis
+import time
 
 def say_something():
     """
@@ -11,15 +12,22 @@ def say_something():
     reddit = praw.Reddit(user_agent=config.my_user_agent,
                          client_id=config.my_client_id,
                          client_secret=config.my_client_secret)
-    subreddit = reddit.subreddit("nocontext")
-    
+    red = redis.Redis(host = 'localhost', db = config.subfeed_db)
+    filter_words = ['nigger','holocaust','jews','bomb','nazi']
+    nocontext_key = "nocontext"
+    subreddit = reddit.subreddit("nocontext")    
     while True:
         submission = subreddit.random()
-        if submission.score >= 10:
+        if submission.score >= 10 and not any(word in submission.title.lower().split() for word in filter_words):
             nocontext_message = submission.title    
             if nocontext_message.startswith('"') and nocontext_message.endswith('"'):
                 nocontext_message = nocontext_message[1:-1]
-            return nocontext_message
+            current_time = int(time.time())
+            present_in_db = red.zadd(nocontext_key, submission.id, current_time)
+            if present_in_db == 1:
+                return nocontext_message
+            else:
+                pass
 
 
 
@@ -65,6 +73,8 @@ def give_advice(advice_category):
     """
     Returns advice from shittylifeprotips
     """
+    red = redis.Redis(host = 'localhost', db = config.subfeed_db)
+    advice_key = "LPT"
     reddit = praw.Reddit(user_agent=config.my_user_agent,
                          client_id=config.my_client_id,
                          client_secret=config.my_client_secret)
@@ -80,4 +90,9 @@ def give_advice(advice_category):
             advice = advice.replace("LPT:","")
             advice = advice.replace("lpt:","")
             advice = advice.strip()
-            return(str(advice))
+            current_time = int(time.time())
+            present_in_db = red.zadd(advice_key, submission.id, current_time)
+            if present_in_db == 1:
+                return(str(advice))
+            else:
+                pass

@@ -34,7 +34,7 @@ async def on_message(message):
     """
     Processes incoming message to do various fun stuff
     """
-    response = functions.processMessage(message, bot)
+    response = await functions.processMessage(message, bot)
     if response:
         await bot.send_message(message.channel, response)
     await bot.process_commands(message)

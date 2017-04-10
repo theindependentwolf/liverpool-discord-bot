@@ -4,9 +4,6 @@ from bs4 import BeautifulSoup
 import config
 
 
-"""
-gets the score from livescores.com
-"""
 def get_scores(*league):
     """
     Scrape livescores.com to get live scores

@@ -351,5 +351,6 @@ async def processMessage(message, bot):
         else:
             return
 
-
-
+    if "male models" in message.content.lower():
+        await asyncio.sleep(2)
+        return "No one cares " + message.author.nick

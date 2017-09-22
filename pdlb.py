@@ -15,7 +15,9 @@ import asyncio
 import praw
 import subfeed
 import re
-
+import facts
+import result_details
+import assign_roles
 
 description = ''' Birdie-G, a red avian bot. '''
 
@@ -46,7 +48,7 @@ async def no_context_general():
     Send a message from /r/nocontext
     """
     await bot.wait_until_ready()
-    talk_interval = 40000 
+    talk_interval = 50000 
     nocontext_channel = discord.Object(id=config.nocontext_channel_id)
     while not bot.is_closed:
         nocontext_message = reddit.say_something()
@@ -69,7 +71,6 @@ async def subredditfeed():
             pass
             
         await asyncio.sleep(config.subfeed_update_interval)
-
 
 
 async def twitterfeed():
@@ -146,7 +147,7 @@ async def klopp(*number):
     !klopp or !klopp <number>
     """
     if number:
-        inputval = number[0][0]
+        inputval = number[0]
         if(str(inputval).isdigit()):
             choice = inputval
         else:
@@ -258,19 +259,54 @@ async def scores(*league):
 
 
 @bot.command()
+async def fact():
+    """
+    Get random LFC fact
+    """
+    lfc_fact = facts.get_random_facts()
+    embed = discord.Embed(description = lfc_fact, color = discord.Colour(0xcc0000))
+    await bot.say(embed=embed)
+
+
+@bot.command()
+async def fixtures():
+    """
+    Displays the next 5 fixtures
+    """
+    fixtures_list = result_details.get_fixtures()
+    embed = discord.Embed(description = fixtures_list, color = discord.Colour(0xcc0000))    
+    await bot.say(embed=embed)
+
+
+@bot.command()
 async def next():
     """
     Next Game Countdown. Ask Liverbird.
     """
-    spurs = datetime.datetime(2017, 2, 11, 17, 30)
-    now = datetime.datetime.now()
-    countdown = relativetd.relativedelta(spurs, now)
-    if ( countdown.seconds > 0):
-        countdown_display_string = "```{} days {} hours {} minutes {} seconds\n\nLiverpool Vs Spurs at Anfield```".format(countdown.days, countdown.hours, countdown.minutes, countdown.seconds)
-        await bot.say(countdown_display_string)
-    else:
-        await bot.say("No matches entered in the program. Please ask Liverbird.")
+    countdown = result_details.next_game()
+    embed = discord.Embed(description = countdown, color = discord.Colour(0xcc0000))    
+    await bot.say(embed=embed)
 
+
+@bot.command(pass_context=True)
+async def verify(ctx, username):
+    """
+    Assign verified role to user
+    """
+    server = ctx.message.server
+    member = server.get_member_named(username)
+    reddit_user = assign_roles.get_reddit_user(member.name, server) 
+    role = discord.utils.get(server.roles, name=config.VERIFIED_ROLE)
+    
+    if not assign_roles.is_author_mod(ctx):
+        await bot.say("lol you're not a mod")
+    elif not member:
+        await bot.say("User doesn't exist")
+    elif not reddit_user:
+        await bot.say(username + " didn't make a comment in the reddit thread or hasn't typed it properly.")
+    else:
+        await bot.add_roles(member, role)    
+        await bot.say("Verified")
 
 bot.loop.create_task(no_context_general())
 bot.loop.create_task(subredditfeed())

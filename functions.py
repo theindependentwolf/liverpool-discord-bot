@@ -76,7 +76,12 @@ def goals(name):
 		'suarez':'https://www.youtube.com/watch?v=iX8eZn9uFU4',
 		'xabi':'https://www.youtube.com/watch?v=DuZd0n8MqWs',
 		'lallana':'https://www.youtube.com/watch?v=7oBfGmrmQ8c',
-		'istanbul':'https://www.youtube.com/watch?v=tnB4XAhl6PY'
+		'istanbul':'https://www.youtube.com/watch?v=tnB4XAhl6PY',
+        'can':'https://streamable.com/tbebj',
+        'torres':'https://www.youtube.com/watch?v=VMDDRTZX86M',
+        'lallana':'https://www.youtube.com/watch?v=1YZaTaMpcIk',
+        'fowler':'https://www.youtube.com/watch?v=izhKzPsJo5g',
+        
 	}
 
     return (goaldict.get(name[0],notfound))	
@@ -87,6 +92,7 @@ def cat(number):
     """
     Returns a random cat if number not specified
     """
+
     cat_list = ["https://gfycat.com/CornyGleamingJoey", "https://gfycat.com/LateUnknownGossamerwingedbutterfly", "https://gfycat.com/CloseMediocreEland", "https://gfycat.com/VigorousCraftyGopher", "http://imgur.com/gIdpXMF", "http://imgur.com/FJzfQDN", "http://imgur.com/IrbGz3l"]
     
     choice = number
@@ -101,11 +107,12 @@ def klopp(number):
     """
     Returns a random Klopp gif unless number specified
     """
-    klopp_list = ["https://gfycat.com/WelltodoPoorAfricangoldencat","https://gfycat.com/LegalZealousBurro","https://gfycat.com/DangerousForcefulLamb","http://imgur.com/KJxX3ba","https://gfycat.com/HeavyBitesizedBlueandgoldmackaw", "http://imgur.com/fesRVRn","https://media.giphy.com/media/xTiTngTp9RkZAbePOo/giphy.gif","https://gfycat.com/ArtisticThatGreatdane", "https://gfycat.com/WeirdAlienatedKitten","http://tmp.fnordig.de/klopp-facepalm.gif"]
+    klopp_list = ["https://gfycat.com/WelltodoPoorAfricangoldencat","https://gfycat.com/LegalZealousBurro","https://gfycat.com/DangerousForcefulLamb","http://imgur.com/KJxX3ba","https://gfycat.com/HeavyBitesizedBlueandgoldmackaw", "http://imgur.com/fesRVRn","https://media.giphy.com/media/xTiTngTp9RkZAbePOo/giphy.gif","https://gfycat.com/ArtisticThatGreatdane", "https://gfycat.com/WeirdAlienatedKitten","http://tmp.fnordig.de/klopp-facepalm.gif", "https://68.media.tumblr.com/bfd0c76302e28560d95483caa36dd509/tumblr_opl42akJoQ1tf8a5ao1_500.gif"]
     
     choice = number
-    if(choice!='x'):
-        return (klopp_list[(int(choice) % len(klopp_list))])
+
+    if(choice!='x' and int(choice) <= len(klopp_list) and int(choice) >= 0):
+        return klopp_list[int(choice)]
     else:
         return (random.choice(klopp_list))
 
@@ -141,7 +148,8 @@ def table(*country):
         'aus':'http://www.bbc.com/sport/football/australian-a-league/table',
         'ireland':'http://www.bbc.com/sport/football/league-of-ireland-premier/table',
         'league1':'http://www.bbc.com/sport/football/league-one/table',
-        'league2':'http://www.bbc.com/sport/football/league-two/table'
+        'league2':'http://www.bbc.com/sport/football/league-two/table',
+        'portugal':'http://www.bbc.com/sport/football/portuguese-primeira-liga/table'
         }
     if(country):
         league = str(country[0][0]).strip().lower()
@@ -162,7 +170,7 @@ def table(*country):
         prem_table = tables[0]
     rows = prem_table.findChildren('tr')
     skip = 0
-    skip_row = 0
+    skip_row = 1
     count = 1
     table_list = []
     printablestring = ""
@@ -191,6 +199,8 @@ def table(*country):
         table_list.append(team_info)
         skip = 0
         count += 1
+        if count == 21:
+            break;
 
 
     printablestring = '\n'.join(table_list)
@@ -235,15 +245,18 @@ def injuries(team):
     player_info = ""
     heading = "Name".ljust(15) + "Injury".ljust(20) + "Return Date".ljust(15) + "\n" + "--------------------------------------------------------" + "\n"
     player_list = []
-    player_list.append(heading)
+#    player_list.append(heading)
     
     while True:
         if(lp.has_attr('id')):
             break
         else:
             tdlist = lp.find_all('td')#	player_info = tdlist[0].string+"\t"+tdlist[1].string+"\t"+tdlist[3].string
-            if(tdlist[1].find('a')):
-                player_info = str(tdlist[0].string.strip()).ljust(15) + str(tdlist[1].find('a').string.strip()).ljust(20)  + str(tdlist[3].string.strip()).ljust(15)
+            if(tdlist[0].find('a')):
+                if(tdlist[1].find('a')):
+                    player_info = str(tdlist[0].find('a').contents[0].string.strip()).ljust(15) + str(tdlist[1].find('a').contents[0].string.strip()).ljust(20)  + str(tdlist[3].string.strip()).ljust(15)
+                else:    
+                    player_info = str(tdlist[0].find('a').contents[0].string.strip()).ljust(15) + str(tdlist[1].string.strip()).ljust(20)  + str(tdlist[3].string.strip()).ljust(15)
                 player_list.append(player_info.strip())
             else:
                 player_info = str(tdlist[0].string.strip()).ljust(15) + str(tdlist[1].string.strip()).ljust(20) + str(tdlist[3].string.strip()).ljust(15)
@@ -293,7 +306,7 @@ async def processMessage(message, bot):
     """
     swear_words = ['cunt','fuck','fucking','poo', 'shit', 'poop', 'piss', 'ass', 'faggot','nigger','asshole','kunt', 'bitch']
     bot_shitty = ['shit','shitty','cunt']    
-    bot_shitty_response = ['Fuck off, you shitty human!', 'shit human!', 'fuck off!', 'cunt!', 'twat!', 'you little shit!', 'fgt'] 
+    bot_shitty_response = ['Fuck off, you shitty human!', 'shit human!', 'fuck off!', 'cunt!', 'twat!', 'you little shit!', 'fgt', 'wankstain!', 'Jizzmonger!', 'Fucknugget!'] 
     
 
     channel = bot.get_channel('269658482238554113')
@@ -351,5 +364,24 @@ async def processMessage(message, bot):
         else:
             return
 
+    if "male models" in message.content.lower():
+        await asyncio.sleep(2)
+        return "No one cares " + message.author.nick
 
 
+    # 'Could Of' correction
+
+    if " could of " in message.content.lower():
+        return "It's \"could have\", you moron!"
+
+    if " would of " in message.content.lower():
+        return "It's \"would have\", you moron!"
+
+    if " should of " in message.content.lower():
+        return "It's \"should have\", you moron!"
+
+
+    #Ned Advice
+
+    if "ned advice" in message.content.lower():
+        await bot.send_file(message.channel, 'images/diddly.png')

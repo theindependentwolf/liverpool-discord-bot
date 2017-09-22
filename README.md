@@ -38,9 +38,18 @@ Instructions:
 4. Run pdlb.py file
 
 
-To be Added:
+
+Features Recently Added:
+------------------------
+
+1. Discord verification for /r/LiverpoolFC Discord Server via Reddit --> Checks if new discord user has commented on the verification thread on reddit, adds an entry to google sheets and adds the verified role to the user so they can participate in all channels.
+2. Live Scores !score (premier league)
+3. Next 5 fixtures for Liverpool
+4. Automated the next fixture
+
+
+To be Done:
 --------------
 
-1. Logging  
-2. Live Scores
-3. Fixtures
+1. Logging
+2. Clean the code  
